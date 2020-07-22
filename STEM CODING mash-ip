@@ -1,0 +1,312 @@
+let HiScore;
+let score = 0;
+let score2 = 0;
+let HiScore2;
+let move = 10;
+x = 375;
+y = 250;
+
+vx = 10;
+vy = -15;
+
+deltaVx = 0;
+deltaVy = 0;
+
+mass = 3.0;
+dt = 0.1;
+
+g = 9.8;
+blob_radius = 25;
+
+x2 = 300;
+y2 = 200;
+
+vx2 = -10;
+vy2 = -20;
+
+deltaVx2 = 0;
+deltaVy2 = 0;
+
+blob2_radius = 25;
+
+var v1;
+var v2;
+var v3;
+runs = 0;
+collided = false;
+i = 0;
+//it came with this
+function  setup() {
+HiScore = getItem('https://editor.p5js.org/oheatly/sketches/Ovcdav61X - HIGHSCORE');
+HiScore2 = getItem('https://editor.p5js.org/oheatly/sketches/Ovcdav61X - HIGHSCORE2');
+    createCanvas(750, 500);
+      this.focus();
+  px1 = 20;
+px2 = width-20;
+py2 = 0;
+py1 = 0;
+
+}
+
+//from asteroids
+function scoring () {
+ fill("blue");
+ textSize(20);
+ v1 = createVector(deltaVx,deltaVy);
+ v2 = createVector(deltaVx2,deltaVy2);
+ score += v1.mag()/100;
+ score2 += v2.mag()/100;
+ text("Your score is " + round(score) + "!", 200, 470);
+ text("Your highscore is " + HiScore + "!", 400, 470);
+ fill("red");
+ text("Your score is " + round(score2) + "!", 100, 70);
+ text("Your highscore is " + HiScore + "!", 100, 50);
+ if (score>HiScore) {
+  HiScore = score;
+  storeItem('https://editor.p5js.org/oheatly/sketches/Ovcdav61X - HIGHSCORE', HiScore);
+ }
+ if (score2>HiScore2) {
+  HiScore2 = score2;
+  storeItem('https://editor.p5js.org/oheatly/sketches/Ovcdav61X - HIGHSCORE2', HiScore2);
+ }
+}
+
+//from move the blob, accelerate the blob, other blob activities
+function BlobOne() {
+  
+  if (y > height) {
+     fill(0);
+     text('Game Over! Player Two Victory',0.42*width,height/2); 
+     score2+=100;
+     scoring();
+     noLoop();
+     }
+  
+  // Update velocity
+  	vy += deltaVy;
+    vx += deltaVx;
+  
+    // Update location
+  	y += vy*dt;
+    x += vx*dt;
+  
+  	ay = g*mass;
+  
+  	if ((y + blob_radius > height) & (x > 0) & (x < width)) {
+      vy = -1*abs(vy);
+    }
+  
+        Fx = 0;
+    
+  if (keyIsDown(LEFT_ARROW)) {
+        Fx = -15;
+    }
+    if (keyIsDown(RIGHT_ARROW)) {
+        Fx = 15;
+    }
+    Fnetx = Fx;
+    ax = Fnetx/mass;
+    deltaVx = ax*dt;
+  
+    Fy = 0;
+    if (keyIsDown(UP_ARROW)) {
+        Fy = -5;
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+        Fy = 5;
+    }
+    Fnety = Fy + ay;
+    ay = Fnety/mass;
+    deltaVy = ay*dt;
+    deltaVy *= 0.9;
+    deltaVx *= 0.9;
+    stroke("black");
+    fill("blue");
+    ellipse(x,y,2*blob_radius,2*blob_radius);
+  
+}
+
+//from move the blob, accelerate the blob, other blob activities
+function BlobTwo(){
+    
+  if (y2 < 0) {
+     fill(0);
+     text('Game Over! Player One Victory',0.42*width,height/2); 
+     score+=100;
+     scoring();
+     noLoop();
+     }
+  
+  	// Update velocity
+  	vy2 += deltaVy2;
+    vx2 += deltaVx2;
+  
+    // Update location
+  	y2 += vy2*dt;
+    x2 += vx2*dt;
+  
+  	ay2 = -g*mass; // fix this!!
+  
+  	if ((y2 - blob2_radius < 0) & (x2 > 0) & (x2 < width)) {
+       vy2 = 1*abs(vy2);
+    }
+  
+        Fx2 = 0;
+    
+  if (keyIsDown(65)) {
+        Fx2 = -15;
+    }
+    if (keyIsDown(68)) {
+        Fx2 = 15;
+    }
+    Fnetx2 = Fx2;  // why the extra step?
+    ax2 = Fnetx2/mass;
+    deltaVx2 = ax2*dt;
+  
+    Fy2 = 0;
+    if (keyIsDown(87)) {
+        Fy2 = -5;
+    }
+    if (keyIsDown(83)) {
+        Fy2 = 5;
+    }
+    
+    Fnety2 = Fy2 + ay2;  // why the extra step?
+    ay2 = Fnety2/mass;
+    deltaVy2 = ay2*dt;
+    deltaVy2 *= 0.9;
+    deltaVx2 *= 0.9;
+    fill("red");
+    ellipse(x2,y2,2*blob_radius,2*blob_radius);
+      
+}
+
+//from pong
+function Paddles() {
+  stroke("orange");
+  px1 = 20
+  px2 = width-20
+  if (py1>height) {
+   move = -1*random(0,4); 
+  } else if (py1<0) {
+   move = random(0,4);
+  }
+  py1 += move;
+  if (py2>height) {
+   move = -1*random(0,4); 
+  } else if (py2<0) {
+   move = random(0,4);
+  }
+  py2 += move;
+  
+  line(px1, py1-30, px1, py1+30);
+  line(px2, py2-30, px2, py2+30);
+  
+  
+}
+
+//from bonk.io
+function collision () {
+  
+  var disX = abs(x - x2)
+  var disY = abs(y - y2)
+  dis = (disY*disY) + (disX*disX);
+  finDis = sqrt(dis);
+  
+  if (finDis <= blob_radius*2) {
+    
+   collide(); 
+   collided = true;
+   
+  }
+}
+
+//from bonk.io
+function collide () {
+  
+  
+  var v1 = createVector(vx, vy)
+  var v2 = createVector(vx2, vy2)
+  var v3 = createVector(x-x2,y-y2);
+  
+  var theta1 = v1.heading()
+  var theta2 = v2.heading()
+  var phi = v3.heading()/6.28*360
+  var vel1 = v1.mag();
+  var vel2 =  v2.mag();
+  
+  deltaVx = 1 * vel2*cos(theta2-phi) * cos(phi) + vel1*sin(theta1-phi) * cos(phi + 3.14/2)
+  deltaVy = 1 * vel2*cos(theta2-phi) * sin(phi) + vel1*sin(theta1-phi) * sin(phi + 3.14/2)
+  deltaVx2 =1 * vel1*cos(theta1-phi) * cos(phi) + vel2*sin(theta2-phi) * cos(phi + 3.14/2)
+  deltaVy2 =1 * vel1*cos(theta1-phi) * sin(phi) + vel2*sin(theta2-phi) * sin(phi + 3.14/2)
+  
+  vy = 0;
+  vx = 0;
+  vy2= 0;
+  vx2= 0;
+
+}
+
+//I designed most of this for this program
+function collidePaddle () {
+  // Collision variables for the paddles
+  //left paddle with the first blob
+  var disX = x - px1
+  var disY1 = y - (py1 + 20)
+  var disY2 = y - py1
+  var disY3 = y - (py1 - 20)
+  var finDis1 = sqrt(disX*disX + disY1*disY1)
+  var finDis2 = sqrt(disX*disX + disY2*disY2)
+  var finDis3 = sqrt(disX*disX + disY3*disY3)
+  if (finDis1<blob_radius | finDis2<blob_radius | finDis3<blob_radius) {
+    vx = abs(vx);
+  }
+  //right paddle with first blob
+  disX = x - px2
+  disY1 = y - (py2 + 20)
+  disY2 = y - py2
+  disY3 = y - (py2 - 20)
+  finDis1 = sqrt(disX*disX + disY1*disY1)
+  finDis2 = sqrt(disX*disX + disY2*disY2)
+  finDis3 = sqrt(disX*disX + disY3*disY3)
+  if (finDis1<blob_radius | finDis2<blob_radius | finDis3<blob_radius) {
+    vx = -1*abs(vx);
+  } 
+  //left paddle with second blob
+  disX = x2 - px1
+  disY1 = y2 - (py1 + 20)
+  disY2 = y2 - py1
+  disY3 = y2 - (py1 - 20)
+  finDis1 = sqrt(disX*disX + disY1*disY1)
+  finDis2 = sqrt(disX*disX + disY2*disY2)
+  finDis3 = sqrt(disX*disX + disY3*disY3)
+  if (finDis1<blob_radius | finDis2<blob_radius | finDis3<blob_radius) {
+    vx2 = abs(vx);
+  }
+  //right paddle with second blob
+  disX = x2 - px2
+  disY1 = y2 - (py2 + 20)
+  disY2 = y2 - py2
+  disY3 = y2 - (py2 - 20)
+  finDis1 = sqrt(disX*disX + disY1*disY1)
+  finDis2 = sqrt(disX*disX + disY2*disY2)
+  finDis3 = sqrt(disX*disX + disY3*disY3)
+  if (finDis1<blob_radius | finDis2<blob_radius | finDis3<blob_radius) {
+    vx2 = -1*abs(vx);
+  }
+  
+}
+
+// it came with this 
+function draw () {
+
+    background(255);
+  Paddles();
+  scoring();
+  fill(255);
+  stroke("black");
+   BlobOne();
+  BlobTwo();
+  collision();
+  collidePaddle();
+}
